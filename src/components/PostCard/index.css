@@ -1,0 +1,14 @@
+
+ .post_card{
+	display: flex;
+	flex-direction: column;
+ }
+ .card_content{
+	flex: 1;
+ }
+ .card_text{
+	flex: 1
+ }
+ .like {
+	margin-top: 15px;
+ }
