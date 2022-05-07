@@ -10,7 +10,7 @@ import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import api from '../../utils/Api';
+import { useApi } from '../../hooks/useApi';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '@mui/material';
 import AddCommentIcon from '@mui/icons-material/AddComment';
@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 
 
 export const Item = () => {
+    const api = useApi();
     const navigate = useNavigate();
     const [item, setItem] = useState(null);
     const [comments, setComments] = useState(null);
@@ -50,9 +51,9 @@ export const Item = () => {
     };
 
     return (
-        <Container maxWidth="1000">
+        <Container maxWidth="1000" >
             <div>
-                <Button variant="contained" style={{ marginBottom: '20px' }} onClick={() => navigate('/')} >Назад</Button>
+                <Button variant="contained" style={{ marginBottom: '20px', marginLeft: '20px' }} onClick={() => navigate('/')} >Назад</Button>
             </div>
 
             <Paper elevation={2}>
@@ -60,7 +61,6 @@ export const Item = () => {
                     <Grid container alignItems="flex-start" style={{ backgroundColor: 'GhostWhite', minHeight: '50vh', padding: '20px' }}  >
                         <Grid container item xs={6} spacing={2}>
                             <Grid item xs={12} >
-
                                 <img
                                     src={`${item.image}?w=162&auto=format`}
                                     alt={item.title}
@@ -71,8 +71,6 @@ export const Item = () => {
                                         maxHeight: 330,
                                         maxWidth: 400,
                                     }} />
-
-
                             </Grid>
                             <Grid container item xs={12} spacing={2}>
                                 <Grid item xs={1}>
@@ -143,14 +141,9 @@ export const Item = () => {
 
                             </List>
 
-
-
-
                         </Grid>
 
-
                     </Grid>
-
 
                 }
             </Paper>

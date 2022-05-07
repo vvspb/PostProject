@@ -5,10 +5,11 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import api from '../../utils/Api'
+import { useApi } from '../../hooks/useApi'
 import { useNavigate } from 'react-router-dom';
 
 export const CreatePost = () => {
+  const api = useApi();
   const [value, setValue] = useState('https://pearl-store.ru/local/templates/kvokka/components/bitrix/catalog.element/catalog/images/no-image.jpg');
 
   const handleChange = (event) => {

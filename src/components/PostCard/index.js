@@ -1,18 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Button } from '@mui/material';
 import { IconButton } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ShareIcon from '@mui/icons-material/Share';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
@@ -22,44 +17,46 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs';
 
 
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import ModalContext from "../../contexts/modalContext"
+import UserContext from '../../contexts/userContext';
+
 import './index.css'
 
-import { PostList } from '../PostList';
-import api from '../../utils/Api';
+import { useApi } from '../../hooks/useApi';
+import PostContext from '../../contexts/postContext';
 
 
-export const PostCard = ({ itemPost, isInFavorites, setFavorites, user, setPostList }) => {
+export const PostCard = ({ itemPost, isInFavorites, setFavorites, setPostList }) => {
+  const api = useApi();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  //console.log(isInFavorites);
+  const { writeLS, removeLS } = useLocalStorage();
+
+  const { setModalState } = useContext(ModalContext);
+  const { user } = useContext(UserContext);
+  const { post, setPost } = useContext(PostContext);
+
   const likesCount = itemPost.likes
-
-  const writeLS = (key, value) => {
-    const storage = JSON.parse(localStorage.getItem(key)) || [];
-    storage.push(value);
-    localStorage.setItem(key, JSON.stringify(storage));
-  };
-
-  const removeLS = (key, value) => {
-    const storage = JSON.parse(localStorage.getItem(key));
-    const filteredStorage = storage.filter((itemID) => value !== itemID);
-    localStorage.setItem(key, JSON.stringify(filteredStorage));
-  };
-
 
   const addFavorite = () => {
     writeLS('favorites', itemPost._id);
     setFavorites((prevState) => [...prevState, itemPost._id])
     api.addLike(itemPost._id)
       .then((addedItem) => {
-        alert(`${addedItem.title} добавлен в избраное`);
+        setModalState(() => {
+          return { isOpen: true, msg: `"${addedItem.title}" добавлен в избраное`, }
+        })
       })
       .catch(() => {
-        alert('Не удалось добавить');
+        setModalState(() => {
+          return { isOpen: true, msg: `не удалось добавить в избранное "${addedItem.title}"`, }
+        })
       });
   }
 
@@ -68,10 +65,14 @@ export const PostCard = ({ itemPost, isInFavorites, setFavorites, user, setPostL
     setFavorites((prevState) => prevState.filter((itemID) => itemPost._id !== itemID))
     api.deleteLike(itemPost._id)
       .then((removedItem) => {
-        alert(`${removedItem.title} удален из избраного`);
+        setModalState(() => {
+          return { isOpen: true, msg: `"${removedItem.title}" удален из избраного`, }
+        });
       })
       .catch(() => {
-        alert('Не удалось удалить');
+        setModalState(() => {
+          return { isOpen: true, msg: `не удалось удалить из изборанного "${removedItem.title}" `, }
+        });
       });
   }
 
@@ -115,15 +116,13 @@ export const PostCard = ({ itemPost, isInFavorites, setFavorites, user, setPostL
         image={itemPost.image}
         alt="Paella dish"
       />
-    
+
       <CardContent className='card_content'>
         <Typography variant="OVERLINE" paragraph>
           {itemPost.tags}
         </Typography>
-
         <Button>
           <Link to={`posts/${itemPost._id}`}> {itemPost.title}</Link></Button>
-
       </CardContent>
 
       <CardContent className='card_text'>
@@ -145,8 +144,19 @@ export const PostCard = ({ itemPost, isInFavorites, setFavorites, user, setPostL
             {likesCount.length}
           </IconButton>
         )}
-        
+
         {isAuthor ? (<Button onClick={handleClickOpen}>Удалить</Button>) : ('')}
+        {isAuthor ? (<Button
+          onClick={() => {
+            navigate(`/posts/edit/${itemPost._id}`)
+            return setPost(itemPost)
+          }
+          }
+
+        >
+          Редактировать
+        </Button>) : ('')}
+
 
         <Dialog
           open={open}
@@ -157,6 +167,7 @@ export const PostCard = ({ itemPost, isInFavorites, setFavorites, user, setPostL
           <DialogTitle id="alert-dialog-title">
             {"Удаление"}
           </DialogTitle>
+
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               Вы действительно хотите удалить этот пост?

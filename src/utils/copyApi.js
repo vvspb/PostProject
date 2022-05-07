@@ -1,5 +1,9 @@
 import { config } from './config';
 
+const onResponce = (res) => {
+    return res.ok ? res.json() : Promise.reject(`Ошибка : ${res.status}`);
+};
+
 class Api {
     constructor({ url, token }) {
         this._url = url;
@@ -42,8 +46,20 @@ class Api {
 
     };
 
+    editPost(post, itemID){
+        return fetch(`${this._url}/posts/${itemID}`, {
+            method: 'PATCH',
+            headers: {
+                authorization: `Bearer ${this._token}`,
+                'Content-Type': 'application/json',
+                },
+            body: JSON.stringify(post)
+        })
+        .then(res => res.json())
+        .catch(err => alert(err.message));
+    }
+      
     getComment(id){
-
         return fetch(`${this._url}/posts/comments/${id}`, {
             headers: {
                 authorization: `Bearer ${this._token}`,
@@ -114,6 +130,26 @@ class Api {
         .catch(err => alert(err.message));
     }
 
+    signUp(userData) {
+        return fetch(`${this._url}/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        }).then(onResponce);
+    }
+
+    signIn(userData) {
+        return fetch(`${this._url}/signin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        }).then(onResponce);
+    }
 }
 
-export default new Api(config);
+
+export default Api;

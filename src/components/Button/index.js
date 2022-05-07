@@ -4,9 +4,8 @@ import ButtonMui from '@mui/material/Button';
 import { useNavigate, Link } from 'react-router-dom';
 import './index.css';
 
-export const Button = () => {
+export const ButtonPost = () => {
   const navigate = useNavigate();
-
   return (
     <div className='button'>
       <ButtonMui 
